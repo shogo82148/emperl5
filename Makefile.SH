@@ -1069,6 +1069,14 @@ $(PERL_EXE): $& $(perlmain_dep) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT) 
 	    esac
         ;;
 
+	emscripten) $spitshell >>$Makefile <<'!NO!SUBS!'
+	$(SHRPENV) $(CC) -o perl.bc $(CLDFLAGS) $(CCDLFLAGS) $(perlmain_objs) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	emcc perl.bc $(CLDFLAGS) $(CCDLFLAGS) $(EMPERL_LINK_FLAGS) -s NO_EXIT_RUNTIME=0 -o nodeperl_dev.js
+	$(LNS) -f nodeperl_dev $(PERL_EXE)
+	touch $(PERL_EXE)
+!NO!SUBS!
+        ;;
+
         *) $spitshell >>$Makefile <<'!NO!SUBS!'
 	$(SHRPENV) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) $(perlmain_objs) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 !NO!SUBS!
@@ -1076,6 +1084,8 @@ $(PERL_EXE): $& $(perlmain_dep) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT) 
         esac
 
 	$spitshell >>$Makefile <<'!NO!SUBS!'
+emperl.js: $(PERL_EXE)
+	emcc perl.bc $(CLDFLAGS) $(CCDLFLAGS) $(EMPERL_LINK_FLAGS) --preload-file $(EMPERL_PRELOAD_FILE) -o emperl.js
 
 !NO!SUBS!
 
